@@ -15,10 +15,14 @@ router.get("/cadastrar", (req, res) => {
   res.render("criarNovaPizza", { title: "Criar nova pizza"})
 });
 
-router.get("/editar/:id", (req, res) => {
-  const { id } = req.params;
-  const pizza = PizzaController.buscarPizzaPeloId(id);
-  res.render("editarPizza", { pizza })
+router.get("/editar/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pizza = await PizzaController.buscarPizzaPeloId(id);
+    return res.render("editarPizza", { pizza })
+  } catch(err) {
+    return res.status(400).json({ err });
+  }
 });
 
 router.get("/:id", verificarIdMiddleware, PizzaController.buscarPizzaPeloId);
@@ -31,13 +35,17 @@ router.post("/", async function(request, response) {
   response.status(201).redirect("/pizzas");
 });
 
-router.put("/:id", verificarIdMiddleware, function(request, response) {
-  const { id } = request.params;
-  const { sabor, categoria, preco } = request.body;
-
-  PizzaController.editarUmaPizza(id, sabor, categoria, preco)
-
-  return response.redirect("/pizzas");
+router.put('/:id', verificarIdMiddleware, async function (request, response) {
+  try {
+    const { id } = request.params;
+    const { sabor, categoria, preco } = request.body;
+  
+    PizzaController.editarUmaPizza(id, sabor, categoria, preco);
+  
+    return response.redirect('/pizzas');
+  } catch(err) {
+    return res.status(400).json({ err });
+  }
 });
 
 router.delete("/:id", verificarIdMiddleware, async function(request, response) {
